@@ -3,20 +3,103 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice Sunset Cover Studio — GTA-style cover art maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+<header class="topbar">
+  <div class="brand"><span class="brand-mark">VS</span><div><h1>Vice Sunset Cover Studio</h1><p>Turn your photos into GTA-poster-style cover art — offline, nothing uploads.</p></div></div>
+  <div class="top-actions">
+    <label class="size-picker" for="exportSize">Export size</label>
+    <select id="exportSize">
+      <option value="1080x1080">1080 × 1080 · Square</option>
+      <option value="1080x1350">1080 × 1350 · Portrait</option>
+      <option value="1920x1080">1920 × 1080 · Wide</option>
+    </select>
+    <button id="export" type="button" class="primary">Export PNG ↓</button>
+  </div>
+</header>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+  <aside class="controls" aria-label="Cover controls">
+    <section class="panel">
+      <h2>1 · Photos</h2>
+      <p class="hint">Drop 1–4 photos anywhere, or pick files. Click a panel on the cover to select it, then crop it below.</p>
+      <div class="dropzone" id="dropzone" tabindex="0">Drop photos here<br><span>or</span><label class="file-btn">Choose photos<input id="photoFiles" type="file" accept="image/*" multiple hidden></label></div>
+      <div class="samples"><span>Try a sample:</span>
+        <button type="button" class="sample-btn" data-sample="boulevard">Boulevard</button>
+        <button type="button" class="sample-btn" data-sample="pier">Pier</button>
+        <button type="button" id="fillAll" title="Fill every panel with the selected panel's photo">Fill all panels with this photo</button>
+      </div>
+      <p class="hint" id="panelLabel">Selected panel: Hero (1 of 4)</p>
+      <div class="sliders">
+        <label>Zoom <input id="zoom" type="range" min="1" max="2.5" step="0.01" value="1.15"></label>
+        <label>Pan left–right <input id="panX" type="range" min="-0.5" max="0.5" step="0.01" value="0"></label>
+        <label>Pan up–down <input id="panY" type="range" min="-0.5" max="0.5" step="0.01" value="0"></label>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>2 · Layout</h2>
+      <div class="layout-grid" id="layoutGrid" role="group" aria-label="Panel layout">
+        <button type="button" data-layout="hero" class="active">Hero + 3</button>
+        <button type="button" data-layout="split2">Split 2</button>
+        <button type="button" data-layout="trio">Trio</button>
+        <button type="button" data-layout="grid4">Grid 4</button>
+        <button type="button" data-layout="diagonal">Diagonal</button>
+        <button type="button" data-layout="full">Full bleed</button>
+      </div>
+      <label class="check"><input id="frameToggle" type="checkbox" checked> White poster frame + thin panel gaps</label>
+      <label class="check"><input id="grainToggle" type="checkbox" checked> Film grain + vignette</label>
+    </section>
+    <section class="panel">
+      <h2>3 · Colour grade</h2>
+      <div class="grade-grid" id="gradeGrid" role="group" aria-label="Colour grade">
+        <button type="button" data-grade="sunset" class="active">🌇 Sunset</button>
+        <button type="button" data-grade="neon">🌃 Neon</button>
+        <button type="button" data-grade="day">☀️ Day</button>
+        <button type="button" data-grade="noir">🎞️ Noir</button>
+        <button type="button" data-grade="vice">🌴 Vice</button>
+      </div>
+      <div class="sliders">
+        <label>Warmth <input id="warmth" type="range" min="-40" max="40" step="1" value="12"></label>
+        <label>Contrast <input id="contrast" type="range" min="80" max="140" step="1" value="112"></label>
+        <label>Saturation <input id="saturation" type="range" min="60" max="170" step="1" value="128"></label>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>4 · Caption</h2>
+      <label>Title <input id="title" type="text" maxlength="30" value="SUNSET HEIST"></label>
+      <label>Subtitle <input id="subtitle" type="text" maxlength="48" value="Vice City · one last ride"></label>
+      <div class="style-grid" id="styleGrid" role="group" aria-label="Lettering style">
+        <button type="button" data-style="block" class="active">Block</button>
+        <button type="button" data-style="sunset">Sunset gradient</button>
+        <button type="button" data-style="neon">Neon glow</button>
+        <button type="button" data-style="outline">Outline</button>
+        <button type="button" data-style="badge">Badge</button>
+      </div>
+      <div class="row">
+        <label>Title colour <input id="titleColor" type="color" value="#ffffff"></label>
+        <label>Title position
+          <select id="titlePos"><option value="bottom">Bottom</option><option value="top">Top</option><option value="band">Centre band</option></select>
+        </label>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>One-click looks</h2>
+      <div class="preset-grid" id="presetGrid">
+        <button type="button" data-preset="viceSunset">Vice Sunset</button>
+        <button type="button" data-preset="neonNights">Neon Nights</button>
+        <button type="button" data-preset="dayDrive">Day Drive</button>
+        <button type="button" data-preset="noirHeist">Noir Heist</button>
+      </div>
+      <p id="status" role="status">Sample loaded — edit the caption, pick a layout, export.</p>
+    </section>
+  </aside>
+  <section class="stage">
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="cover" width="1080" height="1080" aria-label="Live cover preview"></canvas>
+      <p class="stage-hint">Click a panel to select it · drag on a panel to pan its photo · scroll on a panel to zoom</p>
+    </div>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
